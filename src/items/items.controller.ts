@@ -12,6 +12,7 @@ export class ItemsController {
     @Get()
     getAll(): Iitem[] {
         return this.itemService.findAll()
+        
     }
 
     @Get(':id')
