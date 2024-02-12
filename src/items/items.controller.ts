@@ -5,14 +5,12 @@ import { Iitem } from './interfaces/item.interface';
 
 @Controller('items')
 export class ItemsController {
-    private itemService
+    private readonly itemService: ItemsService
     constructor(){
         this.itemService = new ItemsService
     }
-
     @Get()
     getAll(): Iitem[] {
-
         return this.itemService.findAll()
     }
 
