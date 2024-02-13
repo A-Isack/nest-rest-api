@@ -1,37 +1,32 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post, Put } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Patch, Post, Put, Query } from '@nestjs/common';
 import { createItemDto } from './dto/create-items.dto';
 import { ItemsService } from './items.service';
 import { Iitem } from './interfaces/item.interface';
+import { ObjectId } from 'mongoose';
 
 @Controller('items')
 export class ItemsController {
-    private readonly itemService: ItemsService
-    constructor(){
-        this.itemService = new ItemsService
-    }
+    constructor(private readonly itemService: ItemsService){}
+    
     @Get()
-    getAll(): Iitem[] {
+    async getAll(): Promise<Iitem[]> {
         return this.itemService.findAll()
         
     }
 
     @Get(':id')
-    getById(@Param('id') id: string): string {
-        console.log(id)
-        return `the selected id is ${id}`
+    async getById(@Param('id') id: ObjectId): Promise<Iitem> {
+        return this.itemService.findOne(id)
     }
 
     @Post()
-    createItem(@Body() body: createItemDto): string {
-        console.log(body)
-        return 'Item created successfully'
+    async createItem(@Body() newItemBody: createItemDto): Promise<{message: string, data: Iitem}> {
+        const newItem = await this.itemService.create(newItemBody)
+        return {message: 'Item created successfully', data: newItem}
     }
 
     @Put(':id')
     putItem(@Body() body: createItemDto, @Param('id') itemId: string): { message: string, body: createItemDto } {
-        console.log(body)
-        console.log('itemId')
-        console.log(itemId)
         return { message: `Item ${itemId} updated successfully`, body }
     }
 
@@ -42,11 +37,6 @@ export class ItemsController {
 
     @Patch(':id')
     patchItem(@Body() body: createItemDto, @Param('id') itemId: string): { message: string, body: createItemDto } {
-        console.log(body)
-
-        console.log('itemId')
-        console.log(itemId)
-
         return { message: `Item ${itemId} patched successfully`, body }
     }
 }
