@@ -4,7 +4,7 @@ import { patchItemDto } from './dto/patch-item-dto';
 import { ItemsService } from './items.service';
 import { Iitem } from './interfaces/item.interface';
 import { ObjectId } from 'mongoose';
-
+import { serviceResponse } from 'src/common/interfaces/responce.interfaces';
 @Controller('items')
 export class ItemsController {
     constructor(private readonly itemService: ItemsService){}
@@ -20,24 +20,26 @@ export class ItemsController {
     }
 
     @Post()
-    async createItem(@Body() newItemBody: createItemDto): Promise<{message: string, data: Iitem}> {
+    async createItem(@Body() newItemBody: createItemDto): Promise<serviceResponse<Iitem>> {
         const newItem = await this.itemService.create(newItemBody)
-        return {message: 'Item created successfully', data: newItem}
+        return {code: newItem.code, data: newItem.data, message: newItem.message}
     }
-
+    
     @Put(':id')
-    putItem(@Body() body: createItemDto, @Param('id') itemId: string): { message: string, body: createItemDto } {
-        return { message: `Item ${itemId} updated successfully`, body }
+    async putItem(@Body() body: createItemDto, @Param('id') itemId: ObjectId): Promise<serviceResponse<Iitem>> {
+        const updatedItem = await this.itemService.put(itemId, body)
+        return {code: updatedItem.code, data: updatedItem.data, message: updatedItem.message}
     }
-
+    
     @Delete(':id')
-    deleteItem(@Param('id') itemId: string): string {
-        return `Item number ${itemId} deleted successfully `
+    async deleteItem(@Param('id') itemId: ObjectId): Promise<serviceResponse<Iitem>> {
+        const deletedItem = await this.itemService.delete(itemId)
+        return {code: deletedItem.code, data: deletedItem.data, message: deletedItem.message}
     }
-
+    
     @Patch(':id')
-    async patchItem(@Body() body: patchItemDto, @Param('id') itemId: ObjectId): Promise<{ message: string, response: Iitem }> {
+    async patchItem(@Body() body: patchItemDto, @Param('id') itemId: ObjectId): Promise<serviceResponse<Iitem>> {
         const patchedItemResponse = await this.itemService.patch(itemId, body)
-        return { message: `Item ${itemId} patched successfully`, response: patchedItemResponse }
+        return {code: patchedItemResponse.code, data: patchedItemResponse.data, message: patchedItemResponse.message}
     }
 }

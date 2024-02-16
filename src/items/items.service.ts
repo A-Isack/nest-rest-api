@@ -1,33 +1,13 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, ConflictException, BadRequestException, NotFoundException } from '@nestjs/common';
 import { Iitem } from './interfaces/item.interface';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, ObjectId } from 'mongoose';
-import { createItemDto } from './dto/create-items.dto';
+import { serviceResponse } from '../common/interfaces/responce.interfaces'
+
 @Injectable()
 export class ItemsService {
     constructor(@InjectModel('Item') private readonly ItemModel: Model<Iitem>){}
-    // private readonly items: Iitem[] = [
-    //     {
-    //         id: 324324234,
-    //         name: 'Item 1',
-    //         description: 'item1  desc',
-    //         qty: 45
-    //     },
-    //     {
-    //         id: 345345,
-    //         name: 'Item 2',
-    //         description: 'item2  desc',
-    //         qty: 23
-    //     },
-    //     {
-    //         id: 5758768,
-    //         name: 'Item 3',
-    //         description: 'item3  desc',
-    //         qty: 122
-    //     },
-        
-    // ];
-
+    
     async findAll():Promise<Iitem[]>{
         return this.ItemModel.find().exec()
     }
@@ -36,21 +16,70 @@ export class ItemsService {
         return this.ItemModel.findById(id)
     }
 
-    async create(item: Iitem): Promise<Iitem>{
-        const newItem = (await this.ItemModel.create(item)).save()
-        return newItem
+    async create(item: Iitem): Promise<serviceResponse<Iitem>>{
+        try {
+            const newItem = await this.ItemModel.create(item)
+            return {code: 200, data: newItem, message: 'new item created successfully'}
+        } catch (error) {
+            console.log(error)
+            if(error.code === 11000){
+                throw new ConflictException({msg: 'error creating new item, key already exist',error})
+            }
+            else{
+                throw new BadRequestException({msg: 'unexpected error while creating new item', error})
+            }
+        }
     }
-    async put(id: ObjectId, data: createItemDto): Promise<Iitem>{
-        const updatedItem = await this.ItemModel.findByIdAndUpdate(id, data)
-        return updatedItem
-    }
-    async patch(id: ObjectId, data: Iitem): Promise<Iitem>{
-        const updatedItem = await this.ItemModel.findByIdAndUpdate(id, data).exec()
-        return updatedItem
-    }
-    async delete(id: ObjectId): Promise<Iitem>{
-        const ItemToDelete = await this.ItemModel.findByIdAndDelete(id)
-        return ItemToDelete
+
+    async put(id: ObjectId, reqData: Iitem): Promise<serviceResponse<Iitem>>{
+        try {
+            const updatedItem = await this.ItemModel.findByIdAndUpdate(id, reqData, {new: true})
+            if(updatedItem){
+                return {code: 200, data: updatedItem, message: 'new Updated created successfully'}
+            }
+            else{
+             throw new  NotFoundException({msg: 'Item not found'}) 
+            }
+        } catch (error) {
+            if(error.code === 11000){
+                throw new ConflictException({msg: 'error updating item, key already exist',error}) 
+            }
+            else{
+                throw new BadRequestException({msg: 'unexpected error while updating item', error})
+            }
+        }
     }
     
+    async patch(id: ObjectId, data: Iitem): Promise<serviceResponse<Iitem>>{
+        try {
+            const patchedItem = await this.ItemModel.findByIdAndUpdate(id, data, {new: true})
+            if(patchedItem){
+                return {code: 200, data: patchedItem, message: 'Item Updated created successfully'}
+            }
+            else{
+                throw new  NotFoundException({msg: 'Item not found'}) 
+            }
+        } catch (error) {
+            if(error.code === 11000){
+                throw new ConflictException({msg: 'error patching item, key already exist',error})
+            }
+            else{
+                throw new BadRequestException({msg: 'unexpected error while patching item', error})   
+            }
+        }
+    }
+    
+    async delete(id: ObjectId): Promise<serviceResponse<Iitem>>{
+        try {
+            const ItemToDelete = await this.ItemModel.findByIdAndDelete(id)
+            if(ItemToDelete){
+                return {code: 200, data: ItemToDelete, message: 'item deleted successfully'}
+            }
+            else{
+                throw new  NotFoundException({msg: 'Item not found'}) 
+            }
+        } catch (error) {
+                throw new BadRequestException({msg: 'unexpected error while deleting item', error})   
+        }
+    }
 }

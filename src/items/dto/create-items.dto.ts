@@ -1,4 +1,4 @@
-import { IsNumber, IsString, isNumber } from 'class-validator'
+import { IsNumber, IsString, MaxLength, isNumber } from 'class-validator'
 
 export class createItemDto {
     // @IsString()
@@ -9,4 +9,7 @@ export class createItemDto {
     readonly description: string;
     @IsNumber()
     readonly quantity: number;
+    @IsString()
+    @MaxLength(10)
+    readonly quality: String;
 }
