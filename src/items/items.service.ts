@@ -40,12 +40,12 @@ export class ItemsService {
         const newItem = (await this.ItemModel.create(item)).save()
         return newItem
     }
-    async put(id: ObjectId, data: Iitem): Promise<Iitem>{
+    async put(id: ObjectId, data: createItemDto): Promise<Iitem>{
         const updatedItem = await this.ItemModel.findByIdAndUpdate(id, data)
         return updatedItem
     }
     async patch(id: ObjectId, data: Iitem): Promise<Iitem>{
-        const updatedItem = await this.ItemModel.findByIdAndUpdate(id, data)
+        const updatedItem = await this.ItemModel.findByIdAndUpdate(id, data).exec()
         return updatedItem
     }
     async delete(id: ObjectId): Promise<Iitem>{

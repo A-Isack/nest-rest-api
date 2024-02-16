@@ -1,5 +1,6 @@
 import { Body, Controller, Delete, Get, Param, Patch, Post, Put, Query } from '@nestjs/common';
 import { createItemDto } from './dto/create-items.dto';
+import { patchItemDto } from './dto/patch-item-dto';
 import { ItemsService } from './items.service';
 import { Iitem } from './interfaces/item.interface';
 import { ObjectId } from 'mongoose';
@@ -11,7 +12,6 @@ export class ItemsController {
     @Get()
     async getAll(): Promise<Iitem[]> {
         return this.itemService.findAll()
-        
     }
 
     @Get(':id')
@@ -36,7 +36,8 @@ export class ItemsController {
     }
 
     @Patch(':id')
-    patchItem(@Body() body: createItemDto, @Param('id') itemId: string): { message: string, body: createItemDto } {
-        return { message: `Item ${itemId} patched successfully`, body }
+    async patchItem(@Body() body: patchItemDto, @Param('id') itemId: ObjectId): Promise<{ message: string, response: Iitem }> {
+        const patchedItemResponse = await this.itemService.patch(itemId, body)
+        return { message: `Item ${itemId} patched successfully`, response: patchedItemResponse }
     }
 }
