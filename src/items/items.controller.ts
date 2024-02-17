@@ -15,7 +15,7 @@ export class ItemsController {
     }
 
     @Get(':id')
-    async getById(@Param('id') id: ObjectId): Promise<Iitem> {
+    getById(@Param('id') id: ObjectId): Promise<Iitem> {
         return this.itemService.findOne(id)
     }
 

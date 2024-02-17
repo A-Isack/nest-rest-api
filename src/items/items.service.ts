@@ -9,12 +9,32 @@ export class ItemsService {
     constructor(@InjectModel('Item') private readonly ItemModel: Model<Iitem>){}
     
     async findAll():Promise<Iitem[]>{
-        return this.ItemModel.find().exec()
+        try {
+            const allItems = await this.ItemModel.find()
+            if(allItems){
+                return allItems
+            }
+            else{
+                throw new  NotFoundException({msg: 'No items found'}) 
+            }
+        } catch (error) {
+            throw new BadRequestException({msg: 'Unexpected error while execute items query', error})
+        }
     }
 
     async findOne(id: ObjectId): Promise<Iitem>{
-        return this.ItemModel.findById(id)
-    }
+        try {
+            const foundItem = await this.ItemModel.findById(id)
+            if(foundItem){
+                return foundItem
+            }
+            else{
+                throw new  NotFoundException({msg: 'Item not found'}) 
+            }
+        } catch (error) {
+            throw new BadRequestException({msg: 'unexpected error while execute item query', error})
+        }
+    } 
 
     async create(item: Iitem): Promise<serviceResponse<Iitem>>{
         try {
