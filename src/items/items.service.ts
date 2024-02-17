@@ -21,7 +21,6 @@ export class ItemsService {
             const newItem = await this.ItemModel.create(item)
             return {code: 200, data: newItem, message: 'new item created successfully'}
         } catch (error) {
-            console.log(error)
             if(error.code === 11000){
                 throw new ConflictException({msg: 'error creating new item, key already exist',error})
             }
