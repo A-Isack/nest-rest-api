@@ -1,21 +1,28 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post, Put, Query } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Patch, Post, Put, Query, UseInterceptors } from '@nestjs/common';
 import { createItemDto } from './dto/create-items.dto';
 import { patchItemDto } from './dto/patch-item-dto';
 import { ItemsService } from './items.service';
 import { Iitem } from './interfaces/item.interface';
 import { ObjectId } from 'mongoose';
-import { serviceResponse } from 'src/common/interfaces/responce.interfaces';
+import { serviceResponse } from 'src/common/interfaces/response.interfaces';
+import { Serialize, SerializeInterceptor } from 'src/interceptors/serialize.interceptors';
+import { itemDto } from 'src/items/dto/item.dto' // will use it's expose properties to view/hide properties in the items data responses.
+
 @Controller('items')
 export class ItemsController {
     constructor(private readonly itemService: ItemsService){}
+    async getAll(): Promise<Iitem[]> {
+        return this.itemService.findAll()
+    }
     
     @Get()
-    async getAll(): Promise<Iitem[]> {
+    @Serialize(itemDto) // Or : ===> @UseInterceptors(new SerializeInterceptor(itemDto))
+    getAllItems(): Promise<Iitem[]>{
         return this.itemService.findAll()
     }
 
     @Get(':id')
-    async getById(@Param('id') id: ObjectId): Promise<Iitem> {
+    getById(@Param('id') id: ObjectId): Promise<Iitem> {
         return this.itemService.findOne(id)
     }
 

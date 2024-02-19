@@ -2,18 +2,31 @@ import { Injectable, ConflictException, BadRequestException, NotFoundException }
 import { Iitem } from './interfaces/item.interface';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, ObjectId } from 'mongoose';
-import { serviceResponse } from '../common/interfaces/responce.interfaces'
+import { serviceResponse } from '../common/interfaces/response.interfaces'
 
 @Injectable()
 export class ItemsService {
     constructor(@InjectModel('Item') private readonly ItemModel: Model<Iitem>){}
     
     async findAll():Promise<Iitem[]>{
-        return this.ItemModel.find().exec()
+        const allItems = await this.ItemModel.find()
+        return allItems
     }
 
     async findOne(id: ObjectId): Promise<Iitem>{
-        return this.ItemModel.findById(id)
+        try{
+            const foundItem = await this.ItemModel.findById(id)
+            if(foundItem){
+                return foundItem
+            }
+            else{
+                throw new NotFoundException(`Item: ${id} does not exist`)
+            }
+        }
+        catch (error){
+            throw new BadRequestException({msg: 'unexpected error while finding item', error})
+        }
+        
     }
 
     async create(item: Iitem): Promise<serviceResponse<Iitem>>{
