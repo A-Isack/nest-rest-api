@@ -5,7 +5,7 @@ import { ItemsService } from './items.service';
 import { Iitem } from './interfaces/item.interface';
 import { ObjectId } from 'mongoose';
 import { serviceResponse } from 'src/common/interfaces/response.interfaces';
-import { Serialize, SerializeInterceptor } from 'src/interceptors/serialize.interceptors';
+import { Serialize, SerializeInterceptor , DoNotHandleThisInterceptor } from 'src/interceptors/serialize.interceptors';
 import { itemDto } from 'src/items/dto/item.dto' // will use it's expose properties to view/hide properties in the items data responses.
 
 @Controller('items')
@@ -21,6 +21,7 @@ export class ItemsController {
         return this.itemService.findAll()
     }
 
+    @UseInterceptors(new DoNotHandleThisInterceptor)
     @Get(':id')
     getById(@Param('id') id: ObjectId): Promise<Iitem> {
         return this.itemService.findOne(id)

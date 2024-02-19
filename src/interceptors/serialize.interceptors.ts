@@ -32,3 +32,15 @@ export class SerializeInterceptor implements NestInterceptor{
         )
     }
 }
+export class DoNotHandleThisInterceptor implements NestInterceptor{
+    intercept(context: ExecutionContext, next: CallHandler<any>): Observable<any> | Promise<Observable<any>> {
+        // This code will run before a request or controller runs.
+        console.log('Running Serialize interceptor before the handler before the handler')
+    
+        return next.handle().pipe(
+            map(()=>{
+                return 'you are forbidden from using this route !!'
+            })
+        )
+    }
+}
