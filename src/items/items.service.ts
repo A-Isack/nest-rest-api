@@ -9,32 +9,38 @@ export class ItemsService {
     constructor(@InjectModel('Item') private readonly ItemModel: Model<Iitem>){}
     
     async findAll():Promise<Iitem[]>{
-        const allItems = await this.ItemModel.find()
-        return allItems
+        try {
+            const allItems = await this.ItemModel.find()
+            if(allItems){
+                return allItems
+            }
+            else{
+                throw new  NotFoundException({msg: 'No items found'}) 
+            }
+        } catch (error) {
+            throw new BadRequestException({msg: 'Unexpected error while execute items query', error})
+        }
     }
 
     async findOne(id: ObjectId): Promise<Iitem>{
-        try{
+        try {
             const foundItem = await this.ItemModel.findById(id)
             if(foundItem){
                 return foundItem
             }
             else{
-                throw new NotFoundException(`Item: ${id} does not exist`)
+                throw new  NotFoundException({msg: 'Item not found'}) 
             }
+        } catch (error) {
+            throw new BadRequestException({msg: 'unexpected error while execute item query', error})
         }
-        catch (error){
-            throw new BadRequestException({msg: 'unexpected error while finding item', error})
-        }
-        
-    }
+    } 
 
     async create(item: Iitem): Promise<serviceResponse<Iitem>>{
         try {
             const newItem = await this.ItemModel.create(item)
             return {code: 200, data: newItem, message: 'new item created successfully'}
         } catch (error) {
-            console.log(error)
             if(error.code === 11000){
                 throw new ConflictException({msg: 'error creating new item, key already exist',error})
             }
