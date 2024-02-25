@@ -11,10 +11,7 @@ import { itemDto } from 'src/items/dto/item.dto' // will use it's expose propert
 @Controller('items')
 export class ItemsController {
     constructor(private readonly itemService: ItemsService){}
-    async getAll(): Promise<Iitem[]> {
-        return this.itemService.findAll()
-    }
-    
+
     @Get()
     @Serialize(itemDto) // Or : ===> @UseInterceptors(new SerializeInterceptor(itemDto))
     getAllItems(): Promise<Iitem[]>{
